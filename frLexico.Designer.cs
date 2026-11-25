@@ -49,6 +49,7 @@
             this.dgvErrores = new System.Windows.Forms.DataGridView();
             this.label6 = new System.Windows.Forms.Label();
             this.rtxEnsamblador = new System.Windows.Forms.RichTextBox();
+            this.btnConversiones = new System.Windows.Forms.Button();
             this.tbLayoutPrincipal.SuspendLayout();
             this.tbLayoutDescripcion.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -150,6 +151,7 @@
             // panel3
             // 
             this.panel3.BackColor = System.Drawing.Color.LightSeaGreen;
+            this.panel3.Controls.Add(this.btnConversiones);
             this.panel3.Controls.Add(this.rtxPostfijo);
             this.panel3.Controls.Add(this.label3);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -288,6 +290,16 @@
             this.rtxEnsamblador.TabIndex = 1;
             this.rtxEnsamblador.Text = "";
             // 
+            // btnConversiones
+            // 
+            this.btnConversiones.Location = new System.Drawing.Point(6, 259);
+            this.btnConversiones.Name = "btnConversiones";
+            this.btnConversiones.Size = new System.Drawing.Size(126, 46);
+            this.btnConversiones.TabIndex = 2;
+            this.btnConversiones.Text = "Ver Conversiones";
+            this.btnConversiones.UseVisualStyleBackColor = true;
+            this.btnConversiones.Click += new System.EventHandler(this.btnConversiones_Click);
+            // 
             // frLexico
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -344,5 +356,6 @@
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.RichTextBox rtxEnsamblador;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button btnConversiones;
     }
 }

@@ -12,9 +12,12 @@ namespace LP1.CodigoIntermedio
         public static ClsInstruccionIntermedia Parsear(string linea)
         {
             Match match = Regex.Match(
-                linea,
-                @"^([a-zA-Z_]\w*)\s*=\s*(-?(?:\d+|[a-zA-Z_]\w*))\s*([+\-*/%])\s*(-?(?:\d+|[a-zA-Z_]\w*))$"
-            );
+    linea,
+    "^([a-zA-Z_]\\w*)\\s*=\\s*" +
+    "(\"[^\"]*\"|-?\\d+|[a-zA-Z_]\\w*)\\s*" +
+    "([+\\-*/%])\\s*" +
+    "(\"[^\"]*\"|-?\\d+|[a-zA-Z_]\\w*)$"
+);
 
             if (!match.Success)
                 return null;

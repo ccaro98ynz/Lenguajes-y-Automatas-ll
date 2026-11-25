@@ -133,7 +133,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AFD %281%29.png" />
+    <Content Include="Ejemplo2.txt">
+      <SubType>Form</SubType>
+    </Content>
     <Content Include="Example.txt" />
+    <Content Include="Pares.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

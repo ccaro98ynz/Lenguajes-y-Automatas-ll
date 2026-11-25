@@ -19,6 +19,7 @@ namespace LP1
         ClsTablaVariables baseTabla = new ClsTablaVariables();
         List<ClsVariable> simbolos = new List<ClsVariable>();
         List<ClsSintactico> tokens_Entrada = new List<ClsSintactico>();
+        List<string> Conversiones = new List<string>();
         ClsSintactico sintacticoActual = null;
 
         public frLexico()
@@ -37,6 +38,7 @@ namespace LP1
                 InicializarAnalisisLexico();
                 dgvErrores.Rows.Clear();
                 dgvTokens.Rows.Clear();
+                Conversiones.Clear();
                 dgvTokens.SuspendLayout();
                 dgvErrores.SuspendLayout();
                 ClsLexico lexicoo = new ClsLexico();
@@ -50,22 +52,26 @@ namespace LP1
                     baseTabla.Limpiar();
                     sintacticoActual.filaError = Errores;
                     sintacticoActual.AnalisisSintactico();
-                    MessageBox.Show($"{dgvErrores.Rows.Count}");
                     if (dgvErrores.Rows.Count == 0)
                     {
                         rtxPostfijo.Text = "";
                         ClsSemantico semantico = new ClsSemantico(tokens_Entrada);
 
                         semantico.Analizar();
-                        MessageBox.Show(
-    "Instrucciones postfijas: " + semantico.Postfijo.Count
-);
-                        rtxPostfijo.Lines = semantico.Postfijo.ToArray();
-                        ClsCodigoIntermedio intermedio = new ClsCodigoIntermedio(semantico.Postfijo);
+                        List<string> instrucciones = semantico.Postfijo;
+                        rtxPostfijo.Lines = instrucciones.ToArray();
+                        ClsCodigoIntermedio intermedio = new ClsCodigoIntermedio(instrucciones);
                         intermedio.Analizar();
                         rtxIntermedio.Lines = intermedio.Instrucciones.ToArray();
                         ClsOptimizador OptimizadorIntermedio = new ClsOptimizador(intermedio.Instrucciones);
+                        OptimizadorIntermedio.Depuracion += (mensaje) =>
+                        {
+                            Conversiones.Add(mensaje);
+                        };
                         List<string> instruccionesOptimizadas = OptimizadorIntermedio.ProbarOptimizacion();
+
+                       
+
                         ClsGenerador8086 generador = new ClsGenerador8086(instruccionesOptimizadas);
                         string codigoAsm = generador.Generar();
 
@@ -117,7 +123,7 @@ namespace LP1
         {
             dgvTokens.Rows.Add(Palabra, Token, Linea, Columna);
         }
-       
+
         private void frLexico_FormClosing(object sender, FormClosingEventArgs e)
         {
             Application.Exit();
@@ -210,5 +216,26 @@ namespace LP1
             cronn.Stop();
             cronn.Start();
         }
+
+        private void btnConversiones_Click(object sender, EventArgs e)
+        {
+            Form formulario = new Form
+            {
+                Text = "Instrucciones Optimizadas",
+                Size = new Size(600, 450),
+                StartPosition = FormStartPosition.CenterParent
+            };
+
+            ListBox lista = new ListBox
+            {
+                Dock = DockStyle.Fill,
+                Font = new Font("Consolas", 11),
+                DataSource = new List<string>(Conversiones)
+            };
+
+            formulario.Controls.Add(lista);
+            formulario.ShowDialog(this);
+        }
     }
-}
+    }
+
