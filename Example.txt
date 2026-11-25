@@ -1,5 +1,0 @@
-mainF()
-int x =100;
-show(x);
-str saludo = "Hola"+"Mundo";
-mainFin

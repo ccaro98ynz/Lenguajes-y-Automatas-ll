@@ -205,14 +205,25 @@ namespace LP1
                     "Destino " + destino + " no es de tipo " + tipo);
         }
 
-        private static string DireccionCadena(string valor,
-            Dictionary<string, string> tipos,
-            Dictionary<string, string> literales)
-        {
-            if (EsLiteralCadena(valor)) return literales[valor];
-            VerificarDestino(valor, "str", tipos);
-            return valor;
-        }
+        private static string DireccionCadena(
+    string valor,
+    Dictionary<string, string> tipos,
+    Dictionary<string, string> literales)
+{
+    if (EsLiteralCadena(valor))
+    {
+        string etiqueta;
+
+        if (!literales.TryGetValue(valor, out etiqueta))
+            throw new InvalidOperationException(
+                "Literal de cadena no registrado: " + valor);
+
+        return etiqueta;
+    }
+
+    VerificarDestino(valor, "str", tipos);
+    return valor;
+}
 
         // Emite copia con un limite de 255 caracteres y NUL final.
         // CX debe tener la capacidad restante (255 al empezar).
@@ -326,6 +337,7 @@ namespace LP1
             sb.AppendLine("    LOOP " + mostrar);
         }
 
+        // Reemplaza SOLO el metodo Generar() dentro de ClsGenerador8086.
         public string Generar()
         {
             List<string> codigo = Optimizar();
@@ -370,6 +382,20 @@ namespace LP1
                 if (tipos.TryGetValue(destino, out previo) && previo != inferido)
                     throw new InvalidOperationException("Temporal con tipos diferentes: " + destino);
                 tipos[destino] = inferido;
+            }
+
+            // 3. Registrar literales de PRINT ANTES de emitir .DATA.
+            // Usamos la misma funcion que registra literales de asignaciones
+            // y concatenaciones para evitar etiquetas duplicadas.
+            foreach (string instruccion in codigo)
+            {
+                string linea = instruccion.Trim();
+                if (!linea.StartsWith("PRINT ", StringComparison.Ordinal))
+                    continue;
+
+                string argumento = linea.Substring(6).Trim();
+                if (EsLiteralCadena(argumento))
+                    AgregarLiteral(argumento, literales);
             }
 
             foreach (KeyValuePair<string, string> t in tipos)
