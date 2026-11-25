@@ -16,8 +16,8 @@ namespace LP1
     {
         Timer cronn = new Timer();
         bool acces = true;
-        ClsTablaSimbolos baseTabla = new ClsTablaSimbolos();
-        List<ClsSimbolo> simbolos = new List<ClsSimbolo>();
+        ClsTablaVariables baseTabla = new ClsTablaVariables();
+        List<ClsVariable> simbolos = new List<ClsVariable>();
         List<ClsSintactico> tokens_Entrada = new List<ClsSintactico>();
         ClsSintactico sintacticoActual = null;
 

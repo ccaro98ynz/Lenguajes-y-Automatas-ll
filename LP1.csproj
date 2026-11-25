@@ -66,8 +66,8 @@
   <ItemGroup>
     <Compile Include="ClsLexico.cs" />
     <Compile Include="ClsPrincipal.cs" />
-    <Compile Include="ClsSimbolo.cs" />
-    <Compile Include="ClsTablaSimbolos.cs" />
+    <Compile Include="ClsVariable.cs" />
+    <Compile Include="ClsTablaVariables.cs" />
     <Compile Include="frInicio.cs">
       <SubType>Form</SubType>
     </Compile>

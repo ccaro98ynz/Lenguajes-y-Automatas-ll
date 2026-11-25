@@ -21,10 +21,10 @@ namespace LP1
             this.columna = columna;
         }
         List<ClsSintactico> li_tokens = new List<ClsSintactico>();
-        private ClsTablaSimbolos variablesDeclaradas = new ClsTablaSimbolos();
-        public ClsSintactico(List<ClsSintactico> li_tokens, ClsTablaSimbolos tablaSimbolos)
+        private ClsTablaVariables variablesDeclaradas = new ClsTablaVariables();
+        public ClsSintactico(List<ClsSintactico> li_tokens, ClsTablaVariables tablaVariables)
         {
-            this.li_tokens = li_tokens; this.variablesDeclaradas = tablaSimbolos; indice = 0;
+            this.li_tokens = li_tokens; this.variablesDeclaradas = tablaVariables; indice = 0;
 
         }
         ClsSintactico aux;

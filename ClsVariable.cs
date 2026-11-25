@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LP1
 {
-    public class ClsSimbolo
+    public class ClsVariable
     {
         public string Nombre { get; set; }
         public int TipoToken { get; set; } // El token del tipo de dato (ej. int, string)

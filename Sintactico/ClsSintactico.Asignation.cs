@@ -17,35 +17,48 @@ namespace LP1
         {
             switch (Valor)
             {
-                case 205: return 1; //string
-                case 206: return 2; //int
-                case 207: return 3; //dec
-                case 208: return 4; //bool
+                case 205: return 1; // string
+                case 206: return 2; // int
+                case 207: return 3; // decimal
+                case 208: return 4; // bool
+
+                case 100: // Identificador
+                    var variable = variablesDeclaradas.Buscar(aux.lexema);
+
+                    if (variable == null)
+                    {
+                        MostrarError("Variable no declarada", 591);
+                        return 0;
+                    }
+
+                    return variable.TipoToken;
+
                 default:
                     return Valor;
             }
         }
-        private bool DetectarIncompatibilidadDeTipos(int tipoVariable)
+        private bool DetectarIncompatibilidadDeTipos(int tipo)
         {
             switch (scopeSemanticoActual)
             {
-                case 1: //string
-                    if (tipoVariable == 106) return false;
-                    break;
-                case 2: //int
-                    if (tipoVariable == 101) return false;
-                    break;
-                case 3: //dec
-                    if (tipoVariable == 101 ||
-                        tipoVariable == 102 ||
-                        tipoVariable == 103) return false;
-                    break;
-                case 4: //bool
-                    if (tipoVariable == 218 ||
-                        tipoVariable == 219) return false;
-                    break;
+                case 1: // string
+                    return tipo != 1 && tipo != 106;
+
+                case 2: // int
+                    return tipo != 2 && tipo != 101;
+
+                case 3: // decimal
+                    return tipo != 3 && tipo != 2 &&
+                           tipo != 101 && tipo != 102 &&
+                           tipo != 103;
+
+                case 4: // bool
+                    return tipo != 4 &&
+                           tipo != 218 && tipo != 219;
+
+                default:
+                    return true;
             }
-            return true;
         }
         private void ValidarIgualacion(string estado = "Inicio", bool EsParametro = false)
         {
@@ -149,7 +162,7 @@ namespace LP1
                     else if (EsTipoVariable(tokenActual)) // si llega un tipo o variable despues del =
                     {
                         int tipoValorAsignado = 0;
-                        if (tokenActual == 100) // Si es un identificador (otra variable)
+                       if (tokenActual == 100) // Si es un identificador (otra variable)
                         {
                             var varDerecha = variablesDeclaradas.Buscar(aux.lexema);
                             if (varDerecha == null)

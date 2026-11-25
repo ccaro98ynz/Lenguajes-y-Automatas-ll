@@ -122,7 +122,7 @@ namespace LP1
         }
         private void frInicio_FormClosing(object sender, FormClosingEventArgs e)
         {
-            RegistrarFuente();
+            //RegistrarFuente();
         }
         #endregion
         private void analisisLexicoToolStripMenuItem_Click(object sender, EventArgs e)

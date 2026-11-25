@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace LP1
 {
-    public class ClsTablaSimbolos
+    public class ClsTablaVariables
     {
         Stack<string> PilaSemantica;
-        private readonly List<ClsSimbolo> _simbolos = new List<ClsSimbolo>();
-        public ClsTablaSimbolos()
+        private readonly List<ClsVariable> _simbolos = new List<ClsVariable>();
+        public ClsTablaVariables()
         {
             PilaSemantica = new Stack<string>();
         }
@@ -30,7 +30,7 @@ namespace LP1
             {
                 return false; // Ya está declarada (Error semántico)
             }
-            var simbolo = new ClsSimbolo
+            var simbolo = new ClsVariable()
             {
                 Nombre = nombre,
                 TipoToken = tipoToken,
@@ -53,12 +53,12 @@ namespace LP1
             }
         }
         // Método para buscar si una variable existe
-        public ClsSimbolo Buscar(string nombre)
+        public ClsVariable Buscar(string nombre)
         {
             return _simbolos.FirstOrDefault(s => s.Nombre == nombre);
         }
-        // Dentro de ClsTablaSimbolos
-        public List<ClsSimbolo> ObtenerSimbolos()
+        // Dentro de ClsTablaVariables
+        public List<ClsVariable> ObtenerSimbolos()
         {
             return _simbolos;
         }

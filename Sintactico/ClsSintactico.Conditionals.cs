@@ -51,7 +51,7 @@ namespace LP1
 
                         if (tokenActual == 100)
                         {
-                            ClsSimbolo variable =
+                            ClsVariable variable =
                                 variablesDeclaradas.Buscar(aux.lexema);
 
                             if (variable == null)
