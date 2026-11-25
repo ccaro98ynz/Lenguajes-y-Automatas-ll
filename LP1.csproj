@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="ClsGenerador8086.cs" />
     <Compile Include="ClsLexico.cs" />
+    <Compile Include="ClsOptimizador.cs" />
     <Compile Include="ClsPrincipal.cs" />
     <Compile Include="ClsVariable.cs" />
     <Compile Include="ClsTablaVariables.cs" />

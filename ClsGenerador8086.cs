@@ -33,7 +33,18 @@ namespace LP1
                 throw new ArgumentNullException("instrucciones");
             entrada = instrucciones;
         }
+        private void EmitirSaltoLinea(StringBuilder sb)
+        {
+            // Retorno de carro (CR)
+            sb.AppendLine("    MOV DL, 13");
+            sb.AppendLine("    MOV AH, 02h");
+            sb.AppendLine("    INT 21h");
 
+            // Salto de linea (LF)
+            sb.AppendLine("    MOV DL, 10");
+            sb.AppendLine("    MOV AH, 02h");
+            sb.AppendLine("    INT 21h");
+        }
         private static bool EsLiteralCadena(string valor)
         {
             return valor.Length >= 2 && valor[0] == '"' &&
@@ -104,70 +115,6 @@ namespace LP1
             return "int";
         }
 
-        private static bool CalcularConstantes(int a, string operador, int b,
-            out int resultado)
-        {
-            resultado = 0;
-            long n;
-            switch (operador)
-            {
-                case "+": n = (long)a + b; break;
-                case "-": n = (long)a - b; break;
-                case "*": n = (long)a * b; break;
-                case "/": if (b == 0) return false; n = a / b; break;
-                case "%": if (b == 0) return false; n = a % b; break;
-                case "==": n = a == b ? 1 : 0; break;
-                case "!=": n = a != b ? 1 : 0; break;
-                case "<": n = a < b ? 1 : 0; break;
-                case ">": n = a > b ? 1 : 0; break;
-                case "<=": n = a <= b ? 1 : 0; break;
-                case ">=": n = a >= b ? 1 : 0; break;
-                case "&&": n = a != 0 && b != 0 ? 1 : 0; break;
-                case "||": n = a != 0 || b != 0 ? 1 : 0; break;
-                default: return false;
-            }
-            if (n < short.MinValue || n > short.MaxValue) return false;
-            resultado = (int)n;
-            return true;
-        }
-
-        // Optimizacion local, sin asumir valores de variables entre bloques.
-        public List<string> Optimizar()
-        {
-            List<string> salida = new List<string>();
-            foreach (string original in entrada)
-            {
-                string linea = (original ?? "").Trim();
-                if (linea.Length == 0) continue;
-                Match b = Binaria.Match(linea);
-                if (b.Success)
-                {
-                    string izq = b.Groups[2].Value;
-                    string op = b.Groups[3].Value;
-                    string der = b.Groups[4].Value;
-                    if (op == "+" && EsLiteralCadena(izq) &&
-                        EsLiteralCadena(der))
-                    {
-                        string combinado = ContenidoLiteral(izq) + ContenidoLiteral(der);
-                        if (combinado.Length <= 255)
-                        {
-                            salida.Add(b.Groups[1].Value + " = \"" + combinado + "\"");
-                            continue;
-                        }
-                    }
-                    int x, y, r;
-                    if (EsEntero16(izq, out x) && EsEntero16(der, out y) &&
-                        CalcularConstantes(x, op, y, out r))
-                    {
-                        salida.Add(b.Groups[1].Value + " = " + r);
-                        continue;
-                    }
-                }
-                salida.Add(linea);
-            }
-            return salida;
-        }
-
         private string NuevaEtiqueta(string prefijo)
         {
             return "CI_" + prefijo + "_" + (++contadorEtiqueta);
@@ -209,21 +156,21 @@ namespace LP1
     string valor,
     Dictionary<string, string> tipos,
     Dictionary<string, string> literales)
-{
-    if (EsLiteralCadena(valor))
-    {
-        string etiqueta;
+        {
+            if (EsLiteralCadena(valor))
+            {
+                string etiqueta;
 
-        if (!literales.TryGetValue(valor, out etiqueta))
-            throw new InvalidOperationException(
-                "Literal de cadena no registrado: " + valor);
+                if (!literales.TryGetValue(valor, out etiqueta))
+                    throw new InvalidOperationException(
+                        "Literal de cadena no registrado: " + valor);
 
-        return etiqueta;
-    }
+                return etiqueta;
+            }
 
-    VerificarDestino(valor, "str", tipos);
-    return valor;
-}
+            VerificarDestino(valor, "str", tipos);
+            return valor;
+        }
 
         // Emite copia con un limite de 255 caracteres y NUL final.
         // CX debe tener la capacidad restante (255 al empezar).
@@ -337,10 +284,10 @@ namespace LP1
             sb.AppendLine("    LOOP " + mostrar);
         }
 
-        // Reemplaza SOLO el metodo Generar() dentro de ClsGenerador8086.
+        // Recibe codigo intermedio ya optimizado. Esta clase solo genera ensamblador.
         public string Generar()
         {
-            List<string> codigo = Optimizar();
+            List<string> codigo = new List<string>(entrada);
             var tipos = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var literales = new Dictionary<string, string>(StringComparer.Ordinal);
             var declaraciones = new List<string>();
@@ -479,9 +426,15 @@ namespace LP1
                 {
                     string origen = linea.Substring(6).Trim();
                     string tipo = TipoOperando(origen, tipos);
-                    if (tipo == "str") EmitirPrintCadena(sb, origen, tipos, literales);
-                    else if (EsNumerico(tipo)) EmitirPrintNumero(sb, origen);
-                    else throw new NotSupportedException("PRINT: " + tipo);
+
+                    if (tipo == "str")
+                        EmitirPrintCadena(sb, origen, tipos, literales);
+                    else if (EsNumerico(tipo))
+                        EmitirPrintNumero(sb, origen);
+                    else
+                        throw new NotSupportedException("PRINT: " + tipo);
+
+                    EmitirSaltoLinea(sb);
                     continue;
                 }
                 if (linea.StartsWith("READ ", StringComparison.Ordinal))

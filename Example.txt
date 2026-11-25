@@ -1,0 +1,10 @@
+mainF()
+str saludo = "Hola";
+show(saludo);
+int x = 0;
+while(x<11)
+{
+show(x);
+x= x+1;
+}
+mainFin
