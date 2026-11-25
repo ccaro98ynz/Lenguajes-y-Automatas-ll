@@ -17,7 +17,27 @@ namespace LP1
         {
             get { return instrucciones; }
         }
+        private void ProcesarEntradaSalida(List<string> tokens)
+        {
+            string instruccion = tokens[0];
 
+            if (tokens.Count < 2)
+                throw new InvalidOperationException(
+                    "La instruccion " + instruccion +
+                    " necesita un argumento.");
+
+            List<string> argumentos =
+                tokens.GetRange(1, tokens.Count - 1);
+
+            if (instruccion == "show")
+            {
+                Emitir("PRINT " + string.Join(" ", argumentos));
+            }
+            else if (instruccion == "input")
+            {
+                Emitir("READ " + string.Join(" ", argumentos));
+            }
+        }
         public ClsCodigoIntermedio(List<string> entrada)
         {
             if (entrada == null)
@@ -303,7 +323,13 @@ namespace LP1
                 }
 
                 // Asignaciones y expresiones normales.
-                ResolverExpresion(tokens);
+                if (tokens[0] == "show" || tokens[0] == "input")
+                {
+                    ProcesarEntradaSalida(tokens);
+                    continue;
+                }
+                    ResolverExpresion(tokens);
+                
             }
         }
     }

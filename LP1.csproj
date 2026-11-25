@@ -64,6 +64,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClsGenerador8086.cs" />
     <Compile Include="ClsLexico.cs" />
     <Compile Include="ClsPrincipal.cs" />
     <Compile Include="ClsVariable.cs" />

@@ -66,6 +66,12 @@ namespace LP1
                         // Necesitas crear un RichTextBox llamado rtxIntermedio.
                         rtxIntermedio.Lines =
                             intermedio.Instrucciones.ToArray();
+                        ClsGenerador8086 generador =
+    new ClsGenerador8086(intermedio.Instrucciones);
+
+                        string codigoAsm = generador.Generar();
+
+                        rtxEnsamblador.Text = codigoAsm;
                     }
                 }
             }
@@ -200,5 +206,9 @@ namespace LP1
             ventanaTabla.Show(this);
         }
 
+        private void frLexico_Load(object sender, EventArgs e)
+        {
+
         }
+    }
 }

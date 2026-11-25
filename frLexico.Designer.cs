@@ -41,6 +41,10 @@
             this.lblTtoken = new System.Windows.Forms.Label();
             this.rtxPostfijo = new System.Windows.Forms.RichTextBox();
             this.rtxIntermedio = new System.Windows.Forms.RichTextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.rtxEnsamblador = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvLexico)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvErrores)).BeginInit();
             this.SuspendLayout();
@@ -62,7 +66,8 @@
             this.dgvLexico.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
             this.dgvLexico.ColumnHeadersHeight = 29;
             this.dgvLexico.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
-            this.dgvLexico.Location = new System.Drawing.Point(533, 138);
+            this.dgvLexico.Location = new System.Drawing.Point(375, 33);
+            this.dgvLexico.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.dgvLexico.Name = "dgvLexico";
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.Color.White;
@@ -79,17 +84,18 @@
             this.dgvLexico.RowTemplate.DefaultCellStyle.SelectionForeColor = System.Drawing.Color.Black;
             this.dgvLexico.RowTemplate.DefaultCellStyle.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvLexico.RowTemplate.Height = 24;
-            this.dgvLexico.Size = new System.Drawing.Size(505, 483);
+            this.dgvLexico.Size = new System.Drawing.Size(379, 392);
             this.dgvLexico.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Arial Rounded MT Bold", 16.2F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(24, 103);
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(11, 5);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(374, 32);
+            this.label1.Size = new System.Drawing.Size(268, 26);
             this.label1.TabIndex = 1;
             this.label1.Text = "Contenido Del Documento";
             // 
@@ -97,10 +103,11 @@
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Arial Rounded MT Bold", 16.2F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(36, 541);
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(12, 454);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(380, 32);
+            this.label2.Size = new System.Drawing.Size(267, 26);
             this.label2.TabIndex = 3;
             this.label2.Text = "Registro Actual de Errores";
             // 
@@ -121,11 +128,12 @@
             this.dgvErrores.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.dgvErrores.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
             this.dgvErrores.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvErrores.Location = new System.Drawing.Point(30, 670);
+            this.dgvErrores.Location = new System.Drawing.Point(11, 495);
+            this.dgvErrores.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.dgvErrores.Name = "dgvErrores";
             this.dgvErrores.RowHeadersWidth = 51;
             this.dgvErrores.RowTemplate.Height = 24;
-            this.dgvErrores.Size = new System.Drawing.Size(1062, 120);
+            this.dgvErrores.Size = new System.Drawing.Size(743, 98);
             this.dgvErrores.TabIndex = 2;
             this.dgvErrores.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvErrores_CellContentClick);
             // 
@@ -133,10 +141,11 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Arial Rounded MT Bold", 16.2F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(527, 103);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label3.Location = new System.Drawing.Point(370, 5);
+            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(266, 32);
+            this.label3.Size = new System.Drawing.Size(194, 26);
             this.label3.TabIndex = 4;
             this.label3.Text = "Tokens y Lexemas";
             // 
@@ -144,18 +153,20 @@
             // 
             this.rtxcode.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.rtxcode.BackColor = System.Drawing.Color.LightSkyBlue;
-            this.rtxcode.Location = new System.Drawing.Point(24, 138);
+            this.rtxcode.Location = new System.Drawing.Point(11, 33);
+            this.rtxcode.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.rtxcode.Name = "rtxcode";
-            this.rtxcode.Size = new System.Drawing.Size(464, 483);
+            this.rtxcode.Size = new System.Drawing.Size(349, 393);
             this.rtxcode.TabIndex = 5;
             this.rtxcode.Text = "";
             this.rtxcode.TextChanged += new System.EventHandler(this.rtxcode_TextChanged);
             // 
             // btnTablaVariables
             // 
-            this.btnTablaVariables.Location = new System.Drawing.Point(1093, 44);
+            this.btnTablaVariables.Location = new System.Drawing.Point(16, 597);
+            this.btnTablaVariables.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.btnTablaVariables.Name = "btnTablaVariables";
-            this.btnTablaVariables.Size = new System.Drawing.Size(152, 56);
+            this.btnTablaVariables.Size = new System.Drawing.Size(114, 46);
             this.btnTablaVariables.TabIndex = 6;
             this.btnTablaVariables.Text = "Mostrar Tabla de Variables";
             this.btnTablaVariables.UseVisualStyleBackColor = true;
@@ -165,35 +176,88 @@
             // 
             this.lblTtoken.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.lblTtoken.AutoSize = true;
-            this.lblTtoken.Font = new System.Drawing.Font("Arial Rounded MT Bold", 16.2F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTtoken.Location = new System.Drawing.Point(539, 32);
+            this.lblTtoken.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTtoken.Location = new System.Drawing.Point(11, 428);
+            this.lblTtoken.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblTtoken.Name = "lblTtoken";
-            this.lblTtoken.Size = new System.Drawing.Size(122, 32);
+            this.lblTtoken.Size = new System.Drawing.Size(89, 26);
             this.lblTtoken.TabIndex = 9;
             this.lblTtoken.Text = "Token : ";
             // 
             // rtxPostfijo
             // 
-            this.rtxPostfijo.Location = new System.Drawing.Point(1216, 609);
+            this.rtxPostfijo.Location = new System.Drawing.Point(1089, 33);
+            this.rtxPostfijo.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.rtxPostfijo.Name = "rtxPostfijo";
-            this.rtxPostfijo.Size = new System.Drawing.Size(292, 276);
+            this.rtxPostfijo.Size = new System.Drawing.Size(220, 392);
             this.rtxPostfijo.TabIndex = 10;
             this.rtxPostfijo.Text = "";
             // 
             // rtxIntermedio
             // 
-            this.rtxIntermedio.Location = new System.Drawing.Point(1093, 138);
+            this.rtxIntermedio.Location = new System.Drawing.Point(770, 33);
+            this.rtxIntermedio.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.rtxIntermedio.Name = "rtxIntermedio";
-            this.rtxIntermedio.Size = new System.Drawing.Size(415, 405);
+            this.rtxIntermedio.Size = new System.Drawing.Size(312, 392);
             this.rtxIntermedio.TabIndex = 11;
             this.rtxIntermedio.Text = "";
             // 
+            // label4
+            // 
+            this.label4.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(765, 5);
+            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(167, 26);
+            this.label4.TabIndex = 12;
+            this.label4.Text = "Cod. Intermedio";
+            // 
+            // label5
+            // 
+            this.label5.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(1084, 5);
+            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(78, 26);
+            this.label5.TabIndex = 13;
+            this.label5.Text = "Postijo";
+            // 
+            // label6
+            // 
+            this.label6.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(765, 426);
+            this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(118, 26);
+            this.label6.TabIndex = 15;
+            this.label6.Text = "Cod.  ASM";
+            // 
+            // rtxEnsamblador
+            // 
+            this.rtxEnsamblador.Location = new System.Drawing.Point(770, 454);
+            this.rtxEnsamblador.Margin = new System.Windows.Forms.Padding(2);
+            this.rtxEnsamblador.Name = "rtxEnsamblador";
+            this.rtxEnsamblador.Size = new System.Drawing.Size(312, 264);
+            this.rtxEnsamblador.TabIndex = 14;
+            this.rtxEnsamblador.Text = "";
+            this.rtxEnsamblador.UseWaitCursor = true;
+            // 
             // frLexico
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.ClientSize = new System.Drawing.Size(1520, 897);
+            this.ClientSize = new System.Drawing.Size(1331, 729);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.rtxEnsamblador);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
             this.Controls.Add(this.rtxIntermedio);
             this.Controls.Add(this.rtxPostfijo);
             this.Controls.Add(this.lblTtoken);
@@ -204,10 +268,12 @@
             this.Controls.Add(this.dgvErrores);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.dgvLexico);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "frLexico";
             this.Text = "frLexico";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frLexico_FormClosing);
+            this.Load += new System.EventHandler(this.frLexico_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvLexico)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvErrores)).EndInit();
             this.ResumeLayout(false);
@@ -227,5 +293,9 @@
         private System.Windows.Forms.Label lblTtoken;
         private System.Windows.Forms.RichTextBox rtxPostfijo;
         private System.Windows.Forms.RichTextBox rtxIntermedio;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.RichTextBox rtxEnsamblador;
     }
 }
