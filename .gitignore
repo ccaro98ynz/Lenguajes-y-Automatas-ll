@@ -1,0 +1,16 @@
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Archivos de compilación
+bin/
+obj/
+
+# Dependencias NuGet
+packages/
+
+# Archivos temporales
+*.log
+*.tmp

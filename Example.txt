@@ -1,0 +1,18 @@
+mainF()
+str x = "100";
+dec numero = 100;
+bool w,y,z;
+w = true, y = false, z = true;
+!w = 100;
+show("Hola mundo");
+for(cont=0,100,>)
+{
+	show("Hola mundo",cont);
+}
+int contador = 0;
+while(contador < 10)
+{
+	show(,contador);
+	!contador = contador + 1;
+}
+mainFin
