@@ -62,7 +62,7 @@ namespace LP1
                         intermedio.Analizar();
                         rtxIntermedio.Lines = intermedio.Instrucciones.ToArray();
                         ClsOptimizador OptimizadorIntermedio = new ClsOptimizador(intermedio.Instrucciones);
-                        List<string> instruccionesOptimizadas = OptimizadorIntermedio.Optimizar();
+                        List<string> instruccionesOptimizadas = OptimizadorIntermedio.ProbarOptimizacion();
                         ClsGenerador8086 generador = new ClsGenerador8086(instruccionesOptimizadas);
                         string codigoAsm = generador.Generar();
 

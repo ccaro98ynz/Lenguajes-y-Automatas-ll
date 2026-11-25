@@ -70,6 +70,8 @@
     <Compile Include="ClsPrincipal.cs" />
     <Compile Include="ClsVariable.cs" />
     <Compile Include="ClsTablaVariables.cs" />
+    <Compile Include="CodigoIntermedio\ClsInstruccionIntermedia.cs" />
+    <Compile Include="CodigoIntermedio\ClsParserIntermedio.cs" />
     <Compile Include="frInicio.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -91,7 +93,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Semantico\ClsSemantico.Convertor.cs" />
-    <Compile Include="ClsCodigoIntermedio.cs" />
+    <Compile Include="CodigoIntermedio\ClsCodigoIntermedio.cs" />
     <Compile Include="Sintactico\ClsSintactico.Asignation.cs" />
     <Compile Include="Sintactico\ClsSintactico.Conditionals.cs" />
     <Compile Include="Sintactico\ClsSintactico.Enviroment.cs" />
