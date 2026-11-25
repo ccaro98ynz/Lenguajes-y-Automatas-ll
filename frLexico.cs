@@ -36,14 +36,13 @@ namespace LP1
                 cronn.Stop();
                 InicializarAnalisisLexico();
                 dgvErrores.Rows.Clear();
-                dgvLexico.Rows.Clear();
-                dgvLexico.SuspendLayout();
+                dgvTokens.Rows.Clear();
+                dgvTokens.SuspendLayout();
                 dgvErrores.SuspendLayout();
                 ClsLexico lexicoo = new ClsLexico();
                 lexicoo.filaToken += Tokens;
                 lexicoo.filaError += Errores;
-                lexicoo.verToken += MostrarToken;
-                lexicoo.AnalisisLexico(rtxcode.Text);
+                lexicoo.AnalisisLexico(rtxCodigo.Text);
                 lexicoo.ListadeTokens(out tokens_Entrada);
                 sintacticoActual = (tokens_Entrada.Count != 0) ? new ClsSintactico(tokens_Entrada, baseTabla) : null;
                 if (sintacticoActual != null)
@@ -51,12 +50,16 @@ namespace LP1
                     baseTabla.Limpiar();
                     sintacticoActual.filaError = Errores;
                     sintacticoActual.AnalisisSintactico();
+                    MessageBox.Show($"{dgvErrores.Rows.Count}");
                     if (dgvErrores.Rows.Count == 0)
                     {
                         rtxPostfijo.Text = "";
                         ClsSemantico semantico = new ClsSemantico(tokens_Entrada);
 
                         semantico.Analizar();
+                        MessageBox.Show(
+    "Instrucciones postfijas: " + semantico.Postfijo.Count
+);
                         rtxPostfijo.Lines = semantico.Postfijo.ToArray();
                         ClsCodigoIntermedio intermedio = new ClsCodigoIntermedio(semantico.Postfijo);
                         intermedio.Analizar();
@@ -72,22 +75,22 @@ namespace LP1
             }
             finally
             {
-                dgvLexico.ResumeLayout();
+                dgvTokens.ResumeLayout();
                 dgvErrores.ResumeLayout();
                 simbolos = baseTabla.ObtenerSimbolos();
                 acces = true;
             }
         }
-        private void MostrarToken(string token)
-        {
-            lock (this)
-            {
-                lblTtoken.Invoke(new Action(() =>
-                {
-                    lblTtoken.Text = "Token : " + token;
-                }));
-            }
-        }
+        //private void MostrarToken(string token)
+        //{
+        //    lock (this)
+        //    {
+        //        lblTtoken.Invoke(new Action(() =>
+        //        {
+        //            lblTtoken.Text = "Token : " + token;
+        //        }));
+        //    }
+        //}
         public void InicializarAnalisisLexico()
         {
             if (dgvErrores.Columns.Count == 0)
@@ -98,12 +101,12 @@ namespace LP1
                 dgvErrores.Columns.Add("Linea", "Linea");
                 dgvErrores.Columns.Add("Columna", "Columna");
             }
-            if (dgvLexico.Columns.Count == 0)
+            if (dgvTokens.Columns.Count == 0)
             {
-                dgvLexico.Columns.Add("Palabra", "Palabra");
-                dgvLexico.Columns.Add("Token", "Token");
-                dgvLexico.Columns.Add("Linea", "Linea");
-                dgvLexico.Columns.Add("Columna", "Columna");
+                dgvTokens.Columns.Add("Palabra", "Palabra");
+                dgvTokens.Columns.Add("Token", "Token");
+                dgvTokens.Columns.Add("Linea", "Linea");
+                dgvTokens.Columns.Add("Columna", "Columna");
             }
         }
         public void Errores(string Palabra, int Token, string Descripcion, int Linea, int Columna)
@@ -112,13 +115,9 @@ namespace LP1
         }
         public void Tokens(string Palabra, int Token, int Linea, int Columna)
         {
-            dgvLexico.Rows.Add(Palabra, Token, Linea, Columna);
+            dgvTokens.Rows.Add(Palabra, Token, Linea, Columna);
         }
-        private void rtxcode_TextChanged(object sender, EventArgs e)
-        {
-            cronn.Stop();
-            cronn.Start();
-        }
+       
         private void frLexico_FormClosing(object sender, FormClosingEventArgs e)
         {
             Application.Exit();
@@ -204,6 +203,12 @@ namespace LP1
         private void frLexico_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void rtxCodigo_TextChanged(object sender, EventArgs e)
+        {
+            cronn.Stop();
+            cronn.Start();
         }
     }
 }

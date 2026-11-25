@@ -14,7 +14,6 @@ namespace LP1
     {
         public Action<string, int, int, int> filaToken;
         public Action<string, int, string, int, int> filaError;
-        public Action<string> verToken;
         char caracter = '\0';
         StringBuilder Lexema; int indice = 0;
         int renglon = 0, columna = 0;
@@ -38,7 +37,6 @@ namespace LP1
                 else
                 {
                     estado = MATRIZ[estado, colmtx];
-                    verToken($"{estado}");
                     ValidarLexema(estado);
                     if (caracter == '\n')
                     {
