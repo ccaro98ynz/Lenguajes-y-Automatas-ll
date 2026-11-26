@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
+using LP1.Optimizaciones;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,7 +10,6 @@ using System.Runtime.Remoting.Lifetime;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 namespace LP1
 {
     public partial class frLexico : Form
@@ -69,8 +69,8 @@ namespace LP1
                             Conversiones.Add(mensaje);
                         };
                         List<string> instruccionesOptimizadas = OptimizadorIntermedio.ProbarOptimizacion();
+                        rtxIntermedio.Lines = instruccionesOptimizadas.ToArray();
 
-                       
 
                         ClsGenerador8086 generador = new ClsGenerador8086(instruccionesOptimizadas);
                         string codigoAsm = generador.Generar();

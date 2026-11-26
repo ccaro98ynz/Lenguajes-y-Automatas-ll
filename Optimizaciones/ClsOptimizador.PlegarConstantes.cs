@@ -41,7 +41,29 @@ namespace LP1.Optimizaciones
 					if (derecha == 0) return;
 					resultado = (long)izquierda % derecha;
 					break;
+				case ">":
+					resultado = izquierda > derecha ? 1 : 0;
+					break;
 
+				case "<":
+					resultado = izquierda < derecha ? 1 : 0;
+					break;
+
+				case ">=":
+					resultado = izquierda >= derecha ? 1 : 0;
+					break;
+
+				case "<=":
+					resultado = izquierda <= derecha ? 1 : 0;
+					break;
+
+				case "==":
+					resultado = izquierda == derecha ? 1 : 0;
+					break;
+
+				case "!=":
+					resultado = izquierda != derecha ? 1 : 0;
+					break;
 				default:
 					return;
 			}

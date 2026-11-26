@@ -6,9 +6,9 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using LP1.CodigoIntermedio;
 
-namespace LP1
+namespace LP1.Optimizaciones
 {
-    public class ClsOptimizador
+    public partial class ClsOptimizador
     {
         private readonly List<string> instrucciones;
         public Action<string> Depuracion;
@@ -24,6 +24,7 @@ namespace LP1
 
             List<string> resultado = new List<string>();
 
+            // 1. Optimizaciones individuales.
             foreach (string linea in instrucciones)
             {
                 ClsInstruccionIntermedia instruccion =
@@ -42,9 +43,29 @@ namespace LP1
                 resultado.Add(instruccion.ToString());
             }
 
-            resultado = PropagarConstantes(resultado);
-            resultado = EliminarTemporalesMuertos(resultado);
+            // 2. Optimizaciones hasta punto fijo.
+            const int maxIteraciones = 20;
+            int iteraciones = 0;
 
+            List<string> anterior;
+
+            do
+            {
+                anterior = new List<string>(resultado);
+
+                resultado = PropagarConstantes(resultado);
+                resultado = SimplificarSaltos(resultado);
+                resultado = EliminarCodigoInalcanzable(resultado);
+                resultado = EliminarSaltosRedundantes(resultado);
+                resultado = EliminarEtiquetasSinReferencias(resultado);
+                resultado = EliminarTemporalesMuertos(resultado);
+
+                iteraciones++;
+
+            } while (!anterior.SequenceEqual(resultado) &&
+                     iteraciones < maxIteraciones);
+
+            // 3. Estadísticas.
             int optimizadas = resultado.Count;
             int eliminadas = originales - optimizadas;
 
@@ -52,75 +73,16 @@ namespace LP1
                 ? 0
                 : (double)eliminadas / originales * 100;
 
-            MessageBox.Show(
-                $"Originales: {originales}\n" +
-                $"Optimizadas: {optimizadas}\n" +
-                $"Eliminadas: {eliminadas}\n" +
-                $"Reducción: {reduccion:F2}%"
-            );
+            //MessageBox.Show(
+            //    $"Originales: {originales}\n" +
+            //    $"Optimizadas: {optimizadas}\n" +
+            //    $"Eliminadas: {eliminadas}\n" +
+            //    $"Reducción: {reduccion:F2}%\n" +
+            //    $"Iteraciones: {iteraciones}"
+            //);
 
             return resultado;
         }
-        private List<string> EliminarTemporalesMuertos(
-    List<string> codigo)
-        {
-            var resultado = new List<string>(codigo);
-
-            bool huboCambios;
-
-            do
-            {
-                huboCambios = false;
-
-                for (int i = resultado.Count - 1; i >= 0; i--)
-                {
-                    Match asignacion = Regex.Match(
-                        resultado[i].Trim(),
-                        @"^(t\d+)\s*=\s*(""?[^""]*""?)$"
-                    );
-
-                    if (!asignacion.Success) continue;
-
-                    string temporal = asignacion.Groups[1].Value;
-                    string valor = asignacion.Groups[2].Value.Trim();
-
-                    // Solo eliminar asignaciones de constantes.
-                    if (!Regex.IsMatch(valor, @"^(?:-?\d+|""[^""]*"")$"))
-                        continue;
-
-                    bool utilizado = false;
-
-                    for (int j = 0; j < resultado.Count; j++)
-                    {
-                        if (i == j) continue;
-
-                        string linea = Regex.Replace(
-                            resultado[j],
-                            @"""[^""]*""",
-                            ""
-                        );
-
-                        if (!Regex.IsMatch(
-                            linea,
-                            $@"\b{Regex.Escape(temporal)}\b",
-                            RegexOptions.IgnoreCase))
-                            continue;
-
-                        utilizado = true;
-                        break;
-                    }
-
-                    if (utilizado) continue;
-
-                    resultado.RemoveAt(i);
-                    huboCambios = true;
-                }
-
-            } while (huboCambios);
-
-            return resultado;
-        }
-
         private void SimplificarExpresion(ClsInstruccionIntermedia instruccion)
         {
             string izquierda = instruccion.Izquierda;
@@ -164,200 +126,7 @@ namespace LP1
             );
         }
 
-        private void PlegarConstantes(ClsInstruccionIntermedia instruccion)
-        {
-            int izquierda, derecha;
 
-            if (!int.TryParse(instruccion.Izquierda, out izquierda)) return;
-            if (!int.TryParse(instruccion.Derecha, out derecha)) return;
-
-            long resultado;
-
-            switch (instruccion.Operador)
-            {
-                case "+":
-                    resultado = (long)izquierda + derecha;
-                    break;
-
-                case "-":
-                    resultado = (long)izquierda - derecha;
-                    break;
-
-                case "*":
-                    resultado = (long)izquierda * derecha;
-                    break;
-
-                case "/":
-                    if (derecha == 0) return;
-                    resultado = (long)izquierda / derecha;
-                    break;
-
-                case "%":
-                    if (derecha == 0) return;
-                    resultado = (long)izquierda % derecha;
-                    break;
-
-                default:
-                    return;
-            }
-
-            if (resultado < short.MinValue || resultado > short.MaxValue)
-                return;
-
-            string original = instruccion.ToString();
-
-            instruccion.Izquierda = resultado.ToString();
-            instruccion.Operador = null;
-            instruccion.Derecha = null;
-
-            Depuracion?.Invoke(
-                "[Plegado de constantes] " +
-                original + " -> " + instruccion
-            );
-        }
-
-
-
-        private void PropagarConstantes(
-     ClsInstruccionIntermedia instruccion,
-     Dictionary<string, string> constantes)
-        {
-            // Sustituir operandos conocidos.
-            if (constantes.TryGetValue(instruccion.Izquierda, out string izquierda))
-                instruccion.Izquierda = izquierda;
-
-            if (!string.IsNullOrEmpty(instruccion.Derecha) &&
-                constantes.TryGetValue(instruccion.Derecha, out string derecha))
-                instruccion.Derecha = derecha;
-
-            // Resolver operaciones aritméticas o concatenaciones.
-            if (!string.IsNullOrEmpty(instruccion.Operador))
-            {
-                PlegarConstantes(instruccion);
-                PlegarCadenas(instruccion);
-                SimplificarExpresion(instruccion);
-            }
-
-            // Invalidar el valor anterior del destino.
-            constantes.Remove(instruccion.Destino);
-
-            // Registrar valores conocidos.
-            if (!string.IsNullOrEmpty(instruccion.Operador))
-                return;
-
-            string valor = instruccion.Izquierda;
-
-            if (short.TryParse(valor, out short numero) ||
-                EsLiteralCadena(valor))
-            {
-                constantes[instruccion.Destino] = valor;
-            }
-        }
-
-        private List<string> PropagarConstantes(List<string> codigo)
-        {
-            var constantes = new Dictionary<string, string>(
-                StringComparer.OrdinalIgnoreCase);
-
-            var resultado = new List<string>();
-
-            foreach (string instruccion in codigo)
-            {
-                string linea = instruccion.Trim();
-
-                // Las declaraciones no alteran los temporales conocidos.
-                if (linea.StartsWith("DECL ", StringComparison.Ordinal))
-                {
-                    resultado.Add(linea);
-                    continue;
-                }
-
-                // Límites de flujo de control.
-                if (linea.StartsWith("LABEL ") ||
-                    linea.StartsWith("GOTO ") ||
-                    linea.StartsWith("IF_FALSE ") ||
-                    linea.StartsWith("PROC ") ||
-                    linea.StartsWith("ENDPROC"))
-                {
-                    constantes.Clear();
-                    resultado.Add(linea);
-                    continue;
-                }
-
-                // PRINT no modifica variables.
-                if (linea.StartsWith("PRINT ", StringComparison.Ordinal))
-                {
-                    resultado.Add(linea);
-                    continue;
-                }
-
-                ClsInstruccionIntermedia actual =
-                    ClsParserIntermedio.Parsear(linea);
-
-                // Reconocer asignaciones simples.
-                if (actual == null)
-                {
-                    Match match = Regex.Match(
-    linea,
-    "^([a-zA-Z_]\\w*)\\s*=\\s*" +
-    "(\"[^\"]*\"|-?\\d+|[a-zA-Z_]\\w*)$"
-);
-                    if (match.Success)
-                    {
-                        actual = new ClsInstruccionIntermedia
-                        {
-                            Destino = match.Groups[1].Value,
-                            Izquierda = match.Groups[2].Value
-                        };
-                    }
-                }
-
-                // Instrucciones que todavía no comprendemos.
-                if (actual == null)
-                {
-                    constantes.Clear();
-                    resultado.Add(linea);
-                    continue;
-                }
-
-                PropagarConstantes(actual, constantes);
-                resultado.Add(actual.ToString());
-            }
-
-            return resultado;
-        }
-
-
-        private void PlegarCadenas(ClsInstruccionIntermedia instruccion)
-        {
-            if (instruccion.Operador != "+") return;
-
-            string izquierda = instruccion.Izquierda;
-            string derecha = instruccion.Derecha;
-
-            if (!EsLiteralCadena(izquierda) ||
-                !EsLiteralCadena(derecha))
-                return;
-
-            string original = instruccion.ToString();
-
-            string contenidoIzquierdo =
-                izquierda.Substring(1, izquierda.Length - 2);
-
-            string contenidoDerecho =
-                derecha.Substring(1, derecha.Length - 2);
-
-            instruccion.Izquierda =
-                "\"" + contenidoIzquierdo + contenidoDerecho + "\"";
-
-            instruccion.Operador = null;
-            instruccion.Derecha = null;
-
-            Depuracion?.Invoke(
-                "[Plegado de cadenas] " +
-                original + " -> " + instruccion
-            );
-        }
 
         private bool EsLiteralCadena(string valor)
         {

@@ -63,11 +63,34 @@ namespace LP1.Optimizaciones
 					resultado.Add(linea);
 					continue;
 				}
+				if (linea.StartsWith("IF_FALSE "))
+				{
+					Match match = Regex.Match(
+						linea,
+						@"^IF_FALSE\s+(\w+)\s+GOTO\s+(\w+)$"
+					);
 
+					if (match.Success)
+					{
+						string condicion = match.Groups[1].Value;
+						string etiqueta = match.Groups[2].Value;
+
+						string valor;
+
+						if (constantes.TryGetValue(condicion, out valor))
+						{
+							if (valor == "0" || valor == "1")
+								linea = $"IF_FALSE {valor} GOTO {etiqueta}";
+						}
+					}
+
+					resultado.Add(linea);
+					constantes.Clear();
+					continue;
+				}
 				// Límites de flujo de control.
 				if (linea.StartsWith("LABEL ") ||
 					linea.StartsWith("GOTO ") ||
-					linea.StartsWith("IF_FALSE ") ||
 					linea.StartsWith("PROC ") ||
 					linea.StartsWith("ENDPROC"))
 				{

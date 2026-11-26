@@ -1,0 +1,14 @@
+﻿mainF()
+int x = Metodo1();
+show(x);
+mainFin
+int Metodo1()
+{
+	int x = 0;
+	while(x<11)
+	{
+		show(x);
+		x= x+1;
+	}
+	return x;
+}

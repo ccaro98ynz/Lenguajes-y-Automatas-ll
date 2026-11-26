@@ -39,7 +39,7 @@ namespace LP1
             {
                 if (tokenActual == 122)//Cierre de parentesis
                 {
-                    if (EsperandoParametro) MostrarError("Falta nueva Declaracion",588);
+                    if (EsperandoParametro) MostrarError("Falta nueva Declaracion", 588);
                     pilaControl.Pop();
                     return;
                 }
@@ -51,10 +51,10 @@ namespace LP1
                     EsperandoParametro = false;
                     switch (tokenActual)
                     {
-                        case 122: pilaControl.Pop();break;//Cierre de parentesis
+                        case 122: pilaControl.Pop(); break;//Cierre de parentesis
                         case 127: //Si llega coma
-                            EsperandoParametro = true; 
-                            ParametrosDeMetodo(); 
+                            EsperandoParametro = true;
+                            ParametrosDeMetodo();
                             break;
                         case 107: ValidarIgualacion("Valor", true); break;//si llega el =
                         default: MostrarError("Lexema no valido en el contexto actual", 554); break;
@@ -79,8 +79,8 @@ namespace LP1
                     switch (tokenActual)
                     {
                         case 202:
-                            MostrarError("Declaracion de metodo Invalida", 556); 
-                            Inc(); 
+                            MostrarError("Declaracion de metodo Invalida", 556);
+                            Inc();
                             continue;
                         case 209: BloqueIf(); break;//Bloque if
                         case 211: BloqueSwitchCase(true); break; //Bloque switch
@@ -122,16 +122,10 @@ namespace LP1
                     if (diReservadas.ContainsValue(tokenActual)) MostrarError("Lexema no valido en el contexto actual", 554);
                     else if (EsTipoVariable(tokenActual))
                     {
-                        switch (tokenActual)
-                        {
-                            default: MostrarError("Lexema no valido en el contexto actual", 554); break;
-                            case 106:
-                            case 100:
-                                Inc();
-                                if (tokenActual == 122) { pilaControl.Pop(); return; }//si llega el parentesis de cierre
-                                else if (tokenActual != 127) MostrarError("Lexema no valido en el contexto actual", 554);
-                                break;
-                        }
+                        Inc();
+                        if (tokenActual == 122) { pilaControl.Pop(); return; }//si llega el parentesis de cierre
+                        else if (tokenActual != 127) MostrarError("Lexema no valido en el contexto actual", 554);
+                        break;
                     }
                 }
                 if (tokenActual == 122) pilaControl.Pop();//si llega el parentesis de cierre

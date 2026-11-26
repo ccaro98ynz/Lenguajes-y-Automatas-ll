@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace LP1.CodigoIntermedio
 {
@@ -12,15 +7,14 @@ namespace LP1.CodigoIntermedio
         public static ClsInstruccionIntermedia Parsear(string linea)
         {
             Match match = Regex.Match(
-    linea,
-    "^([a-zA-Z_]\\w*)\\s*=\\s*" +
-    "(\"[^\"]*\"|-?\\d+|[a-zA-Z_]\\w*)\\s*" +
-    "([+\\-*/%])\\s*" +
-    "(\"[^\"]*\"|-?\\d+|[a-zA-Z_]\\w*)$"
-);
+                linea.Trim(),
+                @"^([a-zA-Z_]\w*)\s*=\s*" +
+                @"(""[^""]*""|-?\d+|[a-zA-Z_]\w*)\s*" +
+                @"(>=|<=|==|!=|[+\-*/%<>])\s*" +
+                @"(""[^""]*""|-?\d+|[a-zA-Z_]\w*)$"
+            );
 
-            if (!match.Success)
-                return null;
+            if (!match.Success) return null;
 
             return new ClsInstruccionIntermedia
             {
