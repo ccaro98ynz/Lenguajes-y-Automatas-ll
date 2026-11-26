@@ -1,8 +1,10 @@
-﻿using System;
+﻿using LP1.Sintactico;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace LP1
 {
@@ -11,7 +13,6 @@ namespace LP1
         public string lexema;
         public int token, linea, columna, indice, tokenActual;
         Stack<string> pilaControl = new Stack<string>();
-
         public Action<string, int, string, int, int> filaError;
         public ClsSintactico(string lexema, int token, int linea, int columna)
         {
@@ -29,6 +30,14 @@ namespace LP1
         }
         ClsSintactico aux;
         bool Continuar = true;
+        private void Dec()
+        {
+            if (indice <= 0) return;
+
+            indice--;
+            tokenActual = li_tokens[indice].token;
+            aux = li_tokens[indice];
+        }
         private void Inc()
         {
             if (!Continuar) return;
@@ -39,6 +48,15 @@ namespace LP1
                 aux = li_tokens[indice];//y sus propiedades  
             }
             else { Continuar = false; return; }
+        }
+        private int SiguienteToken(int desplazamiento = 1)
+        {
+            int posicion = indice + desplazamiento;
+
+            if (posicion < 0 || posicion >= li_tokens.Count)
+                return -1;
+
+            return li_tokens[posicion].token;
         }
         int ultimoToken = 0;
         public void MostrarError(string descripcion, int tokenError)
@@ -102,16 +120,41 @@ namespace LP1
                         {
                             existeMain = true;
                             pilaControl.Push($"{aux.lexema},Metodo principal sin cerrar,{aux.linea},{aux.columna}");
+                            variablesDeclaradas.EntrarAmbito();
+
                             ParametrosDeMetodo(true, true);
                             CuerpoDelMetodo(220);
+
+                            variablesDeclaradas.SalirAmbito();
                         }
                         break;
                     case 202:
                         Inc();
-                        if (!EsIdentificador(tokenActual)) MostrarError("Identificador esperado", 552);
-                        pilaControl.Push($"{aux.lexema},Cuerpo de metodo sin cerrar,{aux.linea},{aux.columna}");
+
+                        if (!EsIdentificador(tokenActual))
+                        {
+                            MostrarError("Identificador esperado", 552);
+                            break;
+                        }
+
+                        if (!RegistrarMetodo(aux.lexema, 0))
+                        {
+                            MostrarError("Método ya declarado", 590);
+                            break;
+                        }
+
+                        pilaControl.Push(
+                            $"{aux.lexema},Cuerpo de metodo sin cerrar,{aux.linea},{aux.columna}"
+                        );
+
+                        variablesDeclaradas.EntrarAmbito();
+
                         ParametrosDeMetodo(true);
                         CuerpoDelMetodo(203);
+
+                        variablesDeclaradas.SalirAmbito();
+
+                        metodoActual = null; 
                         break;
                     case 205:
                     case 206:
@@ -123,14 +166,39 @@ namespace LP1
                         Inc();
                         switch (tokenActual)
                         {
-                            case 121: //Si llega un parentesis despues del identificador
-                                indice--;
-                                pilaControl.Push($"{aux.lexema},Cuerpo de metodo sin cerrar,{aux.linea},{aux.columna}");
+                            case 121:
+
+                                Dec();
+
+                                if (!RegistrarMetodo(aux.lexema, tipoRetornoActual))
+                                {
+                                    MostrarError("Método ya declarado", 590);
+                                    break;
+                                }
+
+                                pilaControl.Push(
+                                    $"{aux.lexema},Cuerpo de metodo sin cerrar,{aux.linea},{aux.columna}"
+                                );
+
+                                variablesDeclaradas.EntrarAmbito();
 
                                 ParametrosDeMetodo(true);
                                 CuerpoDelMetodo(223);
                                 Inc();
-                                if (!ResultadoEsperado()) MostrarError("El tipado del metodo no coincide con el tipo de retorno",593);
+                                if (!ResultadoEsperado())
+                                {
+                                    MostrarError(
+                                        "El tipado del metodo no coincide con el tipo de retorno",
+                                        593
+                                    );
+                                }
+
+                                variablesDeclaradas.SalirAmbito();
+
+                                metodoActual = null;
+
+                               
+
                                 break;
                             case 127: ValidarIgualacion("Coma"); break;//Si llega una coma ,
                             case 107: ValidarIgualacion("Valor"); break; //Si llega el signo igual =
@@ -164,6 +232,14 @@ namespace LP1
 
             // Cursor local: no alteramos indice durante el cálculo.
             int cursor = indice;
+            MessageBox.Show(
+    $"Indice: {indice}\n" +
+    $"Cursor: {cursor}\n" +
+    $"Token actual: {tokenActual}\n" +
+    $"Token del cursor: {li_tokens[cursor].token}\n" +
+    $"Lexema: {li_tokens[cursor].lexema}\n" +
+    $"Tipo esperado: {tipoEsperado}"
+);
             bool esperaOperando = true;
 
             while (cursor < li_tokens.Count &&

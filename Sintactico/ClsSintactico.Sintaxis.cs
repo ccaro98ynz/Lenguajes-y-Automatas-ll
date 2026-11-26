@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Wordprocessing;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,91 +9,6 @@ namespace LP1
     public partial class ClsSintactico
     {
         bool EsperandoParametro = false;
-        private void ParametrosDeMetodo(bool inicio = false, bool esPrincipal = false)
-        {
-            Inc();
-            if (inicio)
-            {
-                if (esPrincipal)
-                {
-                    if (tokenActual != 121) MostrarError("Se esperaba parentesis principal", 553);
-                    else
-                    {
-                        pilaControl.Push($"{aux.lexema},Parentesis principal sin cerrar,{aux.linea},{aux.columna}");
-                        ParametrosDeMetodo();
-                    }
-                }
-                else
-                {
-                    if (tokenActual != 121) MostrarError("Se esperaba parentesis", 553);
-                    else
-                    {
-                        pilaControl.Push($"{aux.lexema},Parametros sin cerrar,{aux.linea},{aux.columna}");
-                        ParametrosDeMetodo();
-                    }
-
-                }
-            }
-            else
-            {
-                if (tokenActual == 122)//Cierre de parentesis
-                {
-                    if (EsperandoParametro) MostrarError("Falta nueva Declaracion", 588);
-                    pilaControl.Pop();
-                    return;
-                }
-                else if (EsTipoVariable(tokenActual))//Llega int bool string ?
-                {
-                    Inc();
-                    if (tokenActual != 100) MostrarError("Identificador esperado", 552);
-                    Inc();
-                    EsperandoParametro = false;
-                    switch (tokenActual)
-                    {
-                        case 122: pilaControl.Pop(); break;//Cierre de parentesis
-                        case 127: //Si llega coma
-                            EsperandoParametro = true;
-                            ParametrosDeMetodo();
-                            break;
-                        case 107: ValidarIgualacion("Valor", true); break;//si llega el =
-                        default: MostrarError("Lexema no valido en el contexto actual", 554); break;
-                    }
-                }
-                else { MostrarError("Tipo de variable no valido", 555); }
-            }
-        }
-        private void CuerpoDelMetodo(int final)
-        {
-            Inc();
-            while (tokenActual != final && Continuar)
-            {
-
-                if (EsTipoVariable(tokenActual))//Si es una variable
-                {
-                    if (tokenActual == 100) ValidarIgualacion("Reasignacion");
-                    else ValidarIgualacion();
-                }
-                else if (EsUnaPalabraReservada(tokenActual))//Si es una reservada del Lenguaje
-                {
-                    switch (tokenActual)
-                    {
-                        case 202:
-                            MostrarError("Declaracion de metodo Invalida", 556);
-                            Inc();
-                            continue;
-                        case 209: BloqueIf(); break;//Bloque if
-                        case 211: BloqueSwitchCase(true); break; //Bloque switch
-                        case 215: BloqueWhile(); break; //Bloque while
-                        case 216: BloqueFor(); break;//Bloque for
-                        case 221: InstruccionImprimir(true); break; // Imprimir en consola
-                        case 222: InstruccionLeer(); break; //Leer input
-                    }
-                }
-                else MostrarError("Lexema no valido en el contexto actual", 554);
-                Inc();
-            }
-            if (tokenActual == final) pilaControl.Pop();
-        }
         private void InstruccionLeer()
         {
             Inc();

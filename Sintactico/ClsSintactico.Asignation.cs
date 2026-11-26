@@ -148,10 +148,11 @@ namespace LP1
                     break;
                 case "Valor":
                     Inc();
+
                     if (tokenActual == 121)//Si llega un parentesis despues del =
                     {
                         pilaControl.Push($"{aux.lexema},Parentesis sin cerrar,{aux.linea},{aux.columna}");
-                        while (tokenActual != 122&&Continuar) { ValidarIgualacion("Valor"); }
+                        while (tokenActual != 122 && Continuar) { ValidarIgualacion("Valor"); }
                         if (tokenActual != 122) MostrarError("Estructura sin cerrar", 557);
                         else pilaControl.Pop();
                         Inc();
@@ -162,15 +163,34 @@ namespace LP1
                     else if (EsTipoVariable(tokenActual)) // si llega un tipo o variable despues del =
                     {
                         int tipoValorAsignado = 0;
-                       if (tokenActual == 100) // Si es un identificador (otra variable)
+                        bool esLlamadaMetodo = tokenActual == 100 && SiguienteToken() == 121;
+                        if (tokenActual == 100) // Si es un identificador (otra variable)
                         {
-                            var varDerecha = variablesDeclaradas.Buscar(aux.lexema);
-                            if (varDerecha == null)
+                            if (esLlamadaMetodo)
                             {
-                                MostrarError("Variable no declarada en la expresión", 591);
-                                return;
+                                tipoValorAsignado = ValidarLlamadaMetodo();
+
+                                if (tipoValorAsignado == 0)
+                                {
+                                    MostrarError(
+                                        "El metodo no proporciona un retorno valido",
+                                        595
+                                    );
+
+                                    return;
+                                }
                             }
-                            tipoValorAsignado = varDerecha.TipoToken;
+                            else
+                            {
+                                var varDerecha = variablesDeclaradas.Buscar(aux.lexema);
+                                if (varDerecha == null)
+                                {
+                                    MostrarError("Variable no declarada en la expresión", 591);
+                                    return;
+                                }
+                                tipoValorAsignado = varDerecha.TipoToken;
+
+                            }
                         }
                         else
                         {
@@ -179,11 +199,17 @@ namespace LP1
 
                         if (DetectarIncompatibilidadDeTipos(tipoValorAsignado))
                         {
-                            MostrarError("Error semántico: Tipos incompatibles en la asignación", 595);
+                            MostrarError(
+                                "Error semántico: Tipos incompatibles en la asignación",
+                                595
+                            );
                         }
                         else
                         {
-                            variablesDeclaradas.ActualizarValor(nombreVariableActual, aux.lexema);
+                            variablesDeclaradas.ActualizarValor(
+                                nombreVariableActual,
+                                esLlamadaMetodo ? null : aux.lexema
+                            );
                         }
                         Inc();
                         if (tokenActual == 122) return;
