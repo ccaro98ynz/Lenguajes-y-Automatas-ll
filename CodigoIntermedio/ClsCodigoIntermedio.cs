@@ -408,7 +408,24 @@ namespace LP1
                     Emitir("LABEL " + primero);
                     continue;
                 }
+                // Inicio del ciclo for.
+                if (EsEtiqueta(primero, "for"))
+                {
+                    ProcesarCondicion(tokens, primero, true);
+                    continue;
+                }
 
+                // Finalizacion del ciclo for.
+                if (EsEtiqueta(primero, "finfor"))
+                {
+                    string numero =
+                        ObtenerNumero(primero, "finfor");
+
+                    Emitir("GOTO for" + numero);
+                    Emitir("LABEL " + primero);
+
+                    continue;
+                }
                 // Declaraciones.
                 if (primero == "int" ||
                     primero == "str" ||

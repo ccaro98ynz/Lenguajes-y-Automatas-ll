@@ -13,6 +13,7 @@ namespace LP1
         private int indice;
         private int contadorIf;
         private int contadorWhile;
+        private int contadorFor;
 
         public List<string> Infijo { get { return li_Infijo; } }
         public List<string> Postfijo { get { return li_Leidos; } }
@@ -92,7 +93,7 @@ namespace LP1
             indice = 0;
             contadorIf = 0;
             contadorWhile = 0;
-
+            contadorFor = 0;
             li_Leidos.Clear();
             li_Infijo.Clear();
             pilaFlowControl.Clear();
@@ -238,6 +239,10 @@ namespace LP1
             {
                 ReescribirWhile();
             }
+            else if (lexema == "for")
+            {
+                ReescribirFor();
+            }
             else if (lexema == "{")
             {
                 ProcesarBloque();
@@ -259,7 +264,83 @@ namespace LP1
                 ReescribirInstruccionPostFijo();
             }
         }
+        private void ReescribirFor()
+        {
+            string etiqueta = "for" + (++contadorFor);
 
+            // Consumir for.
+            Avanzar();
+
+            List<string> argumentos = new List<string>();
+
+            ConsumirParentesis(argumentos);
+
+            // Formato esperado:
+            // i = 100 , 1 , <
+            if (argumentos.Count != 7 ||
+                argumentos[1] != "=" ||
+                argumentos[3] != "," ||
+                argumentos[5] != ",")
+            {
+                throw new InvalidOperationException(
+                    "Estructura for invalida."
+                );
+            }
+
+            string variable = argumentos[0];
+            string inicio = argumentos[2];
+            string limite = argumentos[4];
+            string direccion = argumentos[6];
+
+            string comparador;
+            string operador;
+
+            switch (direccion)
+            {
+                case "<":
+                    comparador = ">=";
+                    operador = "-";
+                    break;
+
+                case ">":
+                    comparador = "<=";
+                    operador = "+";
+                    break;
+
+                default:
+                    throw new InvalidOperationException(
+                        "Direccion del for invalida."
+                    );
+            }
+
+            // Inicializacion.
+            li_Leidos.Add(
+                variable + " " + inicio + " ="
+            );
+
+            // Condicion.
+            li_Leidos.Add(
+                etiqueta + " " +
+                variable + " " +
+                limite + " " +
+                comparador
+            );
+
+            pilaFlowControl.Push(etiqueta);
+
+            // Procesar instrucciones internas.
+            ProcesarBloque();
+
+            // Incremento o decremento automatico.
+            li_Leidos.Add(
+                variable + " " +
+                variable + " 1 " +
+                operador + " ="
+            );
+
+            // Generar finforN.
+            CerrarBloque();
+        }
         private void ReescribirIf()
         {
             string etiqueta = "if" + (++contadorIf);
