@@ -104,7 +104,7 @@ namespace LP1
         };
         protected Dictionary<string, int> diReservadas = new Dictionary<string, int>()
         {
-            {"mainF",201},{"Fn",202},{"End",203 },
+            {"mainF",201},{"fn",202},{"end",203 },
             {"str",205},{"int",206},{"dec",207},{"bool",208},
             {"if",209},{"else",210},
             {"compare",211},{"case",212},{"default",213 },{"fin",214},

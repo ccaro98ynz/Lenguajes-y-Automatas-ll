@@ -16,7 +16,13 @@ namespace LP1
 
         public List<string> Infijo { get { return li_Infijo; } }
         public List<string> Postfijo { get { return li_Leidos; } }
-
+        private bool EsMetodoConRetorno()
+        {
+            return EsTipoDeDato() &&
+                   indice + 2 < li_Input.Count &&
+                   li_Input[indice + 1].token == 100 &&
+                   li_Input[indice + 2].token == 121;
+        }
         public ClsSemantico(List<ClsSintactico> input)
         {
             if (input == null) throw new ArgumentNullException("input");
@@ -86,6 +92,7 @@ namespace LP1
             indice = 0;
             contadorIf = 0;
             contadorWhile = 0;
+
             li_Leidos.Clear();
             li_Infijo.Clear();
             pilaFlowControl.Clear();
@@ -94,16 +101,93 @@ namespace LP1
             {
                 int anterior = indice;
 
-                if (TokenActual() == 201 || TokenActual() == 202)
+                if (EsMetodoConRetorno())
+                {
+                    ReescribirMetodoConRetorno();
+                }
+                else if (TokenActual() == 201 ||
+                         TokenActual() == 202)
+                {
                     ReescribirMetodo();
+                }
                 else
+                {
                     ProcesarInstruccion();
+                }
 
                 if (indice <= anterior)
-                    throw new InvalidOperationException("El análisis no avanzó en el token " + indice);
+                    throw new InvalidOperationException(
+                        "El analisis no avanzo en el token " + indice
+                    );
             }
         }
+        private void ReescribirMetodoConRetorno()
+        {
+            string tipo = LexemaActual();
 
+            Avanzar();
+
+            string nombre = LexemaActual();
+
+            Avanzar();
+
+            // Encabezado del metodo.
+            li_Leidos.Add("FUNC " + tipo + " " + nombre);
+
+            // Consumir parametros.
+            ConsumirParentesis(null);
+
+            // Procesar cuerpo hasta encontrar return.
+            while (HayTokens() && TokenActual() != 223)
+            {
+                int anterior = indice;
+
+                ProcesarInstruccion();
+
+                if (indice <= anterior)
+                    throw new InvalidOperationException(
+                        "No se avanzo en el cuerpo de " + nombre
+                    );
+            }
+
+            if (!HayTokens())
+                throw new InvalidOperationException(
+                    "Falta return en el metodo " + nombre
+                );
+
+            // Consumir return.
+            Avanzar();
+
+            List<string> expresion = new List<string>();
+
+            while (HayTokens() && TokenActual() != 128)
+            {
+                expresion.Add(LexemaActual());
+                Avanzar();
+            }
+
+            if (!HayTokens())
+                throw new InvalidOperationException(
+                    "Falta punto y coma en return."
+                );
+
+            if (expresion.Count == 0)
+                throw new InvalidOperationException(
+                    "Return sin valor."
+                );
+
+            List<string> resultado =
+                ConvertirPostfijo(expresion);
+
+            li_Leidos.Add(
+                "return " + string.Join(" ", resultado)
+            );
+
+            li_Leidos.Add("ENDFUNC");
+
+            // Consumir punto y coma.
+            Avanzar();
+        }
         private void ReescribirMetodo()
         {
             int tokenMetodo = TokenActual();
@@ -312,44 +396,83 @@ namespace LP1
             li_Leidos.Add(string.Join(" ", resultado));
         }
 
-        private List<string> ConvertirPostfijo(List<string> expresion)
+        private List<string> ConvertirPostfijo(
+     List<string> expresion)
         {
             Stack<string> operadores = new Stack<string>();
             List<string> salida = new List<string>();
 
-            foreach (string lexema in expresion)
+            for (int i = 0; i < expresion.Count; i++)
             {
-                if (lexema == "(") operadores.Push(lexema);
+                string lexema = expresion[i];
+
+                // Reconocer llamadas sin argumentos.
+                if (System.Text.RegularExpressions.Regex.IsMatch(
+                        lexema, @"^[a-zA-Z_]\w*$") &&
+                    i + 2 < expresion.Count &&
+                    expresion[i + 1] == "(" &&
+                    expresion[i + 2] == ")")
+                {
+                    salida.Add("CALL:" + lexema + ":0");
+
+                    i += 2;
+
+                    continue;
+                }
+
+                if (lexema == "(")
+                {
+                    operadores.Push(lexema);
+                }
                 else if (lexema == ")")
                 {
-                    while (operadores.Count > 0 && operadores.Peek() != "(")
+                    while (operadores.Count > 0 &&
+                           operadores.Peek() != "(")
+                    {
                         salida.Add(operadores.Pop());
+                    }
+
                     if (operadores.Count == 0)
-                        throw new InvalidOperationException("Paréntesis de cierre inesperado");
+                        throw new InvalidOperationException(
+                            "Parentesis de cierre inesperado"
+                        );
+
                     operadores.Pop();
                 }
                 else if (EsOperador(lexema))
                 {
-                    while (operadores.Count > 0 && operadores.Peek() != "(")
+                    while (operadores.Count > 0 &&
+                           operadores.Peek() != "(")
                     {
                         string superior = operadores.Peek();
-                        bool extraer = lexema == "=" ?
-                            Prioridad(superior) > Prioridad(lexema) :
-                            Prioridad(superior) >= Prioridad(lexema);
+
+                        bool extraer = lexema == "="
+                            ? Prioridad(superior) > Prioridad(lexema)
+                            : Prioridad(superior) >= Prioridad(lexema);
+
                         if (!extraer) break;
+
                         salida.Add(operadores.Pop());
                     }
+
                     operadores.Push(lexema);
                 }
-                else salida.Add(lexema);
+                else
+                {
+                    salida.Add(lexema);
+                }
             }
 
             while (operadores.Count > 0)
             {
                 if (operadores.Peek() == "(")
-                    throw new InvalidOperationException("Paréntesis de apertura sin cerrar");
+                    throw new InvalidOperationException(
+                        "Parentesis de apertura sin cerrar"
+                    );
+
                 salida.Add(operadores.Pop());
             }
+
             return salida;
         }
     }

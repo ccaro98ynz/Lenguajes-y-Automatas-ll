@@ -1,5 +1,8 @@
+int DevolverNumero()
+return 25;
 mainF()
 str saludo = "Hola";
+int numero = DevolverNumero();
 show(saludo);
 int x = 0;
 while(x<11)

@@ -26,6 +26,20 @@ namespace LP1
         private static readonly Regex Identificador = new Regex(@"^[A-Za-z_]\w*$");
         private static readonly Regex Condicional = new Regex(
             @"^IF_FALSE\s+(\S+)\s+GOTO\s+([A-Za-z_]\w*)$");
+        private static readonly Regex LlamadaConRetorno =
+    new Regex(
+        @"^([A-Za-z_]\w*)\s*=\s*CALL\s+([A-Za-z_]\w*)$"
+    );
+
+        private static readonly Regex LlamadaSinRetorno =
+            new Regex(
+                @"^CALL\s+([A-Za-z_]\w*)$"
+            );
+
+        private static readonly Regex Retorno =
+            new Regex(
+                "^RETURN\\s+(" + Operando + ")$"
+            );
 
         public ClsGenerador8086(List<string> instrucciones)
         {
@@ -307,6 +321,27 @@ namespace LP1
             // 2. Tipado de los temporales; los temporales pueden ser str.
             foreach (string linea in codigo)
             {
+                Match llamada = LlamadaConRetorno.Match(linea);
+
+                if (llamada.Success)
+                {
+                    string destinoLlamada = llamada.Groups[1].Value;
+
+                    string tipoExistente;
+
+                    if (tipos.TryGetValue(destinoLlamada, out tipoExistente)
+                        && tipoExistente != "int")
+                    {
+                        throw new InvalidOperationException(
+                            "Destino incompatible con retorno entero: " +
+                            destinoLlamada
+                        );
+                    }
+
+                    tipos[destinoLlamada] = "int";
+
+                    continue;
+                }
                 Match b = Binaria.Match(linea);
                 Match a = Asignacion.Match(linea);
                 string destino = b.Success ? b.Groups[1].Value :
@@ -370,33 +405,146 @@ namespace LP1
             contadorEtiqueta = 0;
             bool dentroMain = false;
             bool terminoMain = false;
-
+            string metodoAuxiliarActual = null;
             foreach (string linea in codigo)
             {
                 if (Declaracion.IsMatch(linea)) continue;
                 if (linea == "PROC MAIN")
                 {
-                    if (dentroMain || terminoMain)
-                        throw new InvalidOperationException("MAIN duplicado.");
+                    if (dentroMain || terminoMain ||
+                        metodoAuxiliarActual != null)
+                    {
+                        throw new InvalidOperationException(
+                            "MAIN duplicado o declarado dentro de otro metodo."
+                        );
+                    }
+
                     dentroMain = true;
+
                     sb.AppendLine("MAIN PROC");
                     sb.AppendLine("    MOV AX, @DATA");
                     sb.AppendLine("    MOV DS, AX");
+
                     continue;
                 }
+                // Finalizacion del metodo principal.
                 if (linea == "ENDPROC MAIN")
                 {
-                    if (!dentroMain) throw new InvalidOperationException("MAIN no iniciado.");
+                    if (!dentroMain)
+                        throw new InvalidOperationException("MAIN no iniciado.");
+
                     sb.AppendLine("    MOV AX, 4C00h");
                     sb.AppendLine("    INT 21h");
                     sb.AppendLine("MAIN ENDP");
+
                     dentroMain = false;
                     terminoMain = true;
                     continue;
                 }
-                if (!dentroMain)
-                    throw new NotSupportedException("Metodo auxiliar pendiente: " + linea);
 
+                // Inicio de un procedimiento auxiliar.
+                if (linea.StartsWith("PROC ", StringComparison.Ordinal))
+                {
+                    if (dentroMain || metodoAuxiliarActual != null)
+                    {
+                        throw new InvalidOperationException(
+                            "No se permiten procedimientos anidados."
+                        );
+                    }
+
+                    metodoAuxiliarActual = linea.Substring(5).Trim();
+
+                    ValidarNombre(metodoAuxiliarActual);
+
+                    sb.AppendLine(metodoAuxiliarActual + " PROC");
+
+                    continue;
+                }
+
+                // Finalizacion de un procedimiento auxiliar.
+                if (linea.StartsWith("ENDPROC ", StringComparison.Ordinal))
+                {
+                    string nombreMetodo = linea.Substring(8).Trim();
+
+                    if (metodoAuxiliarActual == null ||
+                        metodoAuxiliarActual != nombreMetodo)
+                    {
+                        throw new InvalidOperationException(
+                            "Cierre de procedimiento invalido: " +
+                            nombreMetodo
+                        );
+                    }
+
+                    sb.AppendLine("    RET");
+                    sb.AppendLine(metodoAuxiliarActual + " ENDP");
+
+                    metodoAuxiliarActual = null;
+
+                    continue;
+                }
+
+                // Validar que exista un procedimiento abierto.
+                if (!dentroMain && metodoAuxiliarActual == null)
+                {
+                    throw new InvalidOperationException(
+                        "Instruccion fuera de un procedimiento: " + linea
+                    );
+                }
+                // Retorno de un valor.
+                Match retorno = Retorno.Match(linea);
+
+                if (retorno.Success)
+                {
+                    if (metodoAuxiliarActual == null)
+                        throw new InvalidOperationException(
+                            "RETURN fuera de un metodo auxiliar."
+                        );
+
+                    string valor = retorno.Groups[1].Value;
+
+                    string tipo = TipoOperando(valor, tipos);
+
+                    if (tipo != "int")
+                        throw new NotSupportedException(
+                            "Por ahora solo se admiten retornos enteros."
+                        );
+
+                    sb.AppendLine("    MOV AX, " + valor);
+
+                    // RET se genera al procesar ENDPROC.
+                    continue;
+                }
+
+                // Invocacion con retorno.
+                Match llamada = LlamadaConRetorno.Match(linea);
+
+                if (llamada.Success)
+                {
+                    string destino = llamada.Groups[1].Value;
+                    string metodo = llamada.Groups[2].Value;
+
+                    ValidarNombre(metodo);
+                    VerificarDestino(destino, "int", tipos);
+
+                    sb.AppendLine("    CALL " + metodo);
+                    sb.AppendLine("    MOV " + destino + ", AX");
+
+                    continue;
+                }
+
+                // Invocacion sin retorno.
+                Match llamadaVoid = LlamadaSinRetorno.Match(linea);
+
+                if (llamadaVoid.Success)
+                {
+                    string metodo = llamadaVoid.Groups[1].Value;
+
+                    ValidarNombre(metodo);
+
+                    sb.AppendLine("    CALL " + metodo);
+
+                    continue;
+                }
                 if (linea.StartsWith("LABEL ", StringComparison.Ordinal))
                 {
                     string etiqueta = linea.Substring(6).Trim();
@@ -530,8 +678,21 @@ namespace LP1
                     "Instruccion intermedia no implementada: " + linea);
             }
             if (!terminoMain || dentroMain)
-                throw new InvalidOperationException("Falta ENDPROC MAIN.");
+            {
+                throw new InvalidOperationException(
+                    "Falta ENDPROC MAIN."
+                );
+            }
+
+            if (metodoAuxiliarActual != null)
+            {
+                throw new InvalidOperationException(
+                    "Metodo sin cerrar: " + metodoAuxiliarActual
+                );
+            }
+
             sb.AppendLine("END MAIN");
+
             return sb.ToString();
         }
     }

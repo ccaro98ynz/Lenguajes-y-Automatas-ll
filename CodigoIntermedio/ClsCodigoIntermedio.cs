@@ -12,7 +12,98 @@ namespace LP1
         private readonly List<string> instrucciones;
 
         private int contadorTemporal;
+        private string metodoActual = null;
+        private bool ProcesarMetodo(List<string> tokens)
+        {
+            string primero = tokens[0];
+            if (primero == "FUNC")
+            {
+                if (tokens.Count != 3)
+                    throw new InvalidOperationException(
+                        "Declaracion de funcion invalida."
+                    );
 
+                if (metodoActual != null)
+                    throw new InvalidOperationException(
+                        "No se permiten metodos anidados."
+                    );
+
+                metodoActual = tokens[2];
+
+                Emitir("PROC " + metodoActual);
+
+                return true;
+            }
+
+            if (primero == "ENDFUNC")
+            {
+                if (metodoActual == null)
+                    throw new InvalidOperationException(
+                        "No existe una funcion abierta."
+                    );
+
+                Emitir("ENDPROC " + metodoActual);
+
+                metodoActual = null;
+
+                return true;
+            }
+            // Inicio de un metodo auxiliar.
+            if (primero == "fn" || primero == "F")
+            {
+                if (tokens.Count < 2)
+                    throw new InvalidOperationException(
+                        "Metodo sin identificador.");
+
+                if (metodoActual != null)
+                    throw new InvalidOperationException(
+                        "No se permiten metodos anidados.");
+
+                metodoActual = tokens[1];
+
+                Emitir("PROC " + metodoActual);
+
+                return true;
+            }
+
+            // Finalizacion de un metodo auxiliar.
+            if (primero == "end" || primero == "Finally")
+            {
+                if (metodoActual == null)
+                    throw new InvalidOperationException(
+                        "No existe un metodo abierto.");
+
+                Emitir("ENDPROC " + metodoActual);
+
+                metodoActual = null;
+
+                return true;
+            }
+
+            return false;
+        }
+        private bool ProcesarRetorno(List<string> tokens)
+        {
+            if (tokens[0] != "return")
+                return false;
+
+            if (metodoActual == null)
+                throw new InvalidOperationException(
+                    "Return fuera de un metodo.");
+
+            if (tokens.Count < 2)
+                throw new InvalidOperationException(
+                    "Return sin valor.");
+
+            List<string> expresion =
+                tokens.GetRange(1, tokens.Count - 1);
+
+            string resultado = ResolverExpresion(expresion);
+
+            Emitir("RETURN " + resultado);
+
+            return true;
+        }
         public List<string> Instrucciones
         {
             get { return instrucciones; }
@@ -142,6 +233,25 @@ namespace LP1
 
             foreach (string token in tokens)
             {
+                if (token.StartsWith("CALL:"))
+                {
+                    string[] partes = token.Split(':');
+
+                    if (partes.Length != 3 || partes[2] != "0")
+                        throw new InvalidOperationException(
+                            "Llamada a metodo invalida o no soportada."
+                        );
+
+                    string nombreMetodo = partes[1];
+
+                    string temporal = NuevoTemporal();
+
+                    Emitir(temporal + " = CALL " + nombreMetodo);
+
+                    pila.Push(temporal);
+
+                    continue;
+                }
                 if (!EsOperador(token))
                 {
                     pila.Push(token);
@@ -173,8 +283,14 @@ namespace LP1
             }
 
             if (pila.Count != 1)
+            {
                 throw new InvalidOperationException(
-                    "Expresion postfija invalida.");
+                    "Expresion postfija invalida.\n" +
+                    "Tokens: " + string.Join(" ", tokens) + "\n" +
+                    "Elementos en pila: " + pila.Count + "\n" +
+                    "Contenido: " + string.Join(", ", pila.ToArray())
+                );
+            }
 
             return pila.Pop();
         }
@@ -218,7 +334,7 @@ namespace LP1
         {
             instrucciones.Clear();
             contadorTemporal = 0;
-
+            metodoActual = null;
             foreach (string linea in postfijo)
             {
                 if (string.IsNullOrWhiteSpace(linea))
@@ -245,18 +361,10 @@ namespace LP1
                 }
 
                 // Metodos auxiliares.
-                if (primero == "F" && tokens.Count >= 2)
-                {
-                    Emitir("PROC " + tokens[1]);
+                if (ProcesarMetodo(tokens))
                     continue;
-                }
-
-                if (primero == "Finally")
-                {
-                    Emitir("ENDPROC");
+                if (ProcesarRetorno(tokens))
                     continue;
-                }
-
                 // Condicional.
                 if (EsEtiqueta(primero, "if"))
                 {
